@@ -11,13 +11,9 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Plane, MessageCircle, Building2, Zap } from 'lucide-react';
+import Link from 'next/link';
 
 export default function Home() {
-  const handleStartPlanning = () => {
-    // Handle navigation to main app or login flow
-    console.log('Start planning clicked');
-  };
-
   return (
     <div className='min-h-screen bg-gradient-to-br from-gray-50 to-blue-50'>
       {/* Desktop Layout */}
@@ -47,13 +43,11 @@ export default function Home() {
               </p>
             </div>
 
-            <Button
-              onClick={handleStartPlanning}
-              size='lg'
-              className='h-16 px-8 text-xl rounded-2xl'
-            >
-              Start Planning Your Trip
-            </Button>
+            <Link href='/travel-assistant'>
+              <Button size='lg' className='h-16 px-8 text-xl rounded-2xl'>
+                Start Planning Your Trip
+              </Button>
+            </Link>
             <p className='text-gray-400 mt-4'>
               Find hotels, compare prices, and book instantly
             </p>
@@ -209,13 +203,11 @@ export default function Home() {
 
               {/* CTA Button */}
               <div className='space-y-4'>
-                <Button
-                  onClick={handleStartPlanning}
-                  size='lg'
-                  className='w-full h-14 text-lg rounded-2xl'
-                >
-                  Start Planning Your Trip
-                </Button>
+                <Link href='/travel-assistant' className='block'>
+                  <Button size='lg' className='w-full h-14 text-lg rounded-2xl'>
+                    Start Planning Your Trip
+                  </Button>
+                </Link>
                 <p className='text-center text-gray-400 text-sm'>
                   Find hotels, compare prices, and book instantly
                 </p>
