@@ -212,13 +212,6 @@ export default function Home() {
                   Find hotels, compare prices, and book instantly
                 </p>
               </div>
-
-              {/* Page Indicators */}
-              <div className='flex justify-center space-x-2 pt-4'>
-                <div className='w-2 h-2 bg-gray-900 rounded-full'></div>
-                <div className='w-2 h-2 bg-gray-300 rounded-full'></div>
-                <div className='w-2 h-2 bg-gray-300 rounded-full'></div>
-              </div>
             </CardContent>
           </Card>
         </div>
