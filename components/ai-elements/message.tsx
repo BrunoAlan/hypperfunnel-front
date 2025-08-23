@@ -1,8 +1,4 @@
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import type { UIMessage } from 'ai';
 import type { ComponentProps, HTMLAttributes } from 'react';
@@ -39,7 +35,7 @@ export const MessageContent = ({
     )}
     {...props}
   >
-    <div className="is-user:dark">{children}</div>
+    <div className='is-user:dark'>{children}</div>
   </div>
 );
 
@@ -54,11 +50,8 @@ export const MessageAvatar = ({
   className,
   ...props
 }: MessageAvatarProps) => (
-  <Avatar
-    className={cn('size-8 ring ring-1 ring-border', className)}
-    {...props}
-  >
-    <AvatarImage alt="" className="mt-0 mb-0" src={src} />
+  <Avatar className={cn('size-8 ring  ring-border', className)} {...props}>
+    <AvatarImage alt='' className='mt-0 mb-0' src={src} />
     <AvatarFallback>{name?.slice(0, 2) || 'ME'}</AvatarFallback>
   </Avatar>
 );

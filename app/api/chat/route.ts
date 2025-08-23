@@ -8,13 +8,12 @@ export const maxDuration = 30;
 export async function POST(req: Request) {
   try {
     const { messages }: { messages: UIMessage[] } = await req.json();
-
-    const url = new URL('http://127.0.0.1:8001/sse');
+    const MCP_SERVER_URL = process.env.MCP_SERVER_URL || '';
 
     const mcpClient = await createMCPClient({
       transport: {
         type: 'sse',
-        url: url.toString(),
+        url: MCP_SERVER_URL,
       },
     });
 
