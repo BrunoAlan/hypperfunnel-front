@@ -75,10 +75,10 @@ export default function TravelAssistantPage() {
                 variant='outline'
                 size='sm'
                 onClick={() =>
-                  setInput('I need help finding hotels in Paris for next week')
+                  setInput('I need help finding hotels in Mexico for next week')
                 }
               >
-                Find hotels in Paris
+                Find hotels in Mexico
               </Button>
               <Button
                 variant='outline'
@@ -89,26 +89,23 @@ export default function TravelAssistantPage() {
                   )
                 }
               >
-                Beach destinations
+                Where can i go for a beach vacation?
               </Button>
               <Button
                 variant='outline'
                 size='sm'
                 onClick={() =>
-                  setInput('Help me plan a 5-day itinerary for Tokyo')
+                  setInput('Help me plan a 5-day itinerary for Mexico')
                 }
               >
-                Tokyo itinerary
+                Help me plan a 5-day itinerary for Mexico
               </Button>
             </div>
           </CardHeader>
 
           <CardContent className='flex-1 flex flex-col p-0'>
             <div className='flex-1 relative'>
-              <Conversation
-                className='absolute inset-0'
-                key={`conversation-${messages.length}`}
-              >
+              <Conversation className='absolute inset-0'>
                 <ConversationContent className='p-6'>
                   {messages.length === 0 && (
                     <div className='flex items-center justify-center h-full'>
