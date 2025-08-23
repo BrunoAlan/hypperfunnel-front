@@ -16,19 +16,39 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Plane, ArrowLeft, MessageCircle } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useChat } from '@ai-sdk/react';
 import Link from 'next/link';
 
 export default function TravelAssistantPage() {
   const [input, setInput] = useState('');
+  const [forceUpdate, setForceUpdate] = useState(0);
   const { messages, sendMessage, status } = useChat();
+
+  // Force UI refresh when status changes
+  useEffect(() => {
+    // Set up a polling mechanism to ensure UI updates during tool usage
+    let intervalId: NodeJS.Timeout | null = null;
+
+    if (status === 'streaming') {
+      // During streaming, force a refresh every 500ms
+      intervalId = setInterval(() => {
+        setForceUpdate((prev) => prev + 1);
+      }, 500);
+    }
+
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [status]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (input.trim()) {
       sendMessage({ role: 'user', parts: [{ type: 'text', text: input }] });
       setInput('');
+      // Force an immediate update when sending a message
+      setForceUpdate((prev) => prev + 1);
     }
   };
 
@@ -129,46 +149,20 @@ export default function TravelAssistantPage() {
                   {messages.map((message) => (
                     <Message from={message.role} key={message.id}>
                       <MessageContent>
-                        {message.parts.map((part, i) => {
-                          switch (part.type) {
-                            case 'text':
-                              return (
-                                <Response key={`${message.id}-${i}`}>
-                                  {part.text}
-                                </Response>
-                              );
-                            case 'tool-call':
-                              return (
-                                <div
-                                  key={`${message.id}-${i}`}
-                                  className='bg-blue-50 border border-blue-200 rounded-lg p-3 my-2'
-                                >
-                                  <div className='flex items-center space-x-2 text-blue-700 text-sm font-medium'>
-                                    🔧 <span>Using tool: {part.type}</span>
-                                  </div>
-                                </div>
-                              );
-                            case 'tool-result':
-                              return (
-                                <div
-                                  key={`${message.id}-${i}`}
-                                  className='bg-green-50 border border-green-200 rounded-lg p-3 my-2'
-                                >
-                                  <div className='flex items-center space-x-2 text-green-700 text-sm font-medium'>
-                                    ✅ <span>Tool completed</span>
-                                  </div>
-                                </div>
-                              );
-                            default:
-                              return null;
-                          }
-                        })}
+                        {/* Filter out tool-related messages and only show text messages */}
+                        {message.parts
+                          .filter((part) => part.type === 'text')
+                          .map((part, i) => (
+                            <Response key={`${message.id}-${i}`}>
+                              {part.text}
+                            </Response>
+                          ))}
                       </MessageContent>
                     </Message>
                   ))}
 
-                  {/* Loading indicator */}
-                  {/* {status === 'streaming' && (
+                  {/* Loading indicator - Uncomment to show feedback during streaming */}
+                  {status === 'streaming' && (
                     <Message from='assistant'>
                       <MessageContent>
                         <div className='flex items-center space-x-2 text-gray-500'>
@@ -177,7 +171,7 @@ export default function TravelAssistantPage() {
                         </div>
                       </MessageContent>
                     </Message>
-                  )} */}
+                  )}
                 </ConversationContent>
                 <ConversationScrollButton />
               </Conversation>
@@ -199,6 +193,12 @@ export default function TravelAssistantPage() {
                   status={status === 'streaming' ? 'streaming' : 'ready'}
                   disabled={!input.trim() || status === 'streaming'}
                   className='absolute bottom-2 right-2 rounded-lg'
+                  onClick={() => {
+                    // Force an update when clicking the submit button
+                    if (input.trim()) {
+                      setForceUpdate((prev) => prev + 1);
+                    }
+                  }}
                 />
               </PromptInput>
             </div>
