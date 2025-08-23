@@ -22,33 +22,13 @@ import Link from 'next/link';
 
 export default function TravelAssistantPage() {
   const [input, setInput] = useState('');
-  const [forceUpdate, setForceUpdate] = useState(0);
   const { messages, sendMessage, status } = useChat();
-
-  // Force UI refresh when status changes
-  useEffect(() => {
-    // Set up a polling mechanism to ensure UI updates during tool usage
-    let intervalId: NodeJS.Timeout | null = null;
-
-    if (status === 'streaming') {
-      // During streaming, force a refresh every 500ms
-      intervalId = setInterval(() => {
-        setForceUpdate((prev) => prev + 1);
-      }, 500);
-    }
-
-    return () => {
-      if (intervalId) clearInterval(intervalId);
-    };
-  }, [status]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (input.trim()) {
       sendMessage({ role: 'user', parts: [{ type: 'text', text: input }] });
       setInput('');
-      // Force an immediate update when sending a message
-      setForceUpdate((prev) => prev + 1);
     }
   };
 
@@ -125,7 +105,10 @@ export default function TravelAssistantPage() {
 
           <CardContent className='flex-1 flex flex-col p-0'>
             <div className='flex-1 relative'>
-              <Conversation className='absolute inset-0'>
+              <Conversation
+                className='absolute inset-0'
+                key={`conversation-${messages.length}`}
+              >
                 <ConversationContent className='p-6'>
                   {messages.length === 0 && (
                     <div className='flex items-center justify-center h-full'>
@@ -147,9 +130,8 @@ export default function TravelAssistantPage() {
                   )}
 
                   {messages.map((message) => (
-                    <Message from={message.role} key={message.id}>
+                    <Message from={message.role} key={`${message.id}`}>
                       <MessageContent>
-                        {/* Filter out tool-related messages and only show text messages */}
                         {message.parts
                           .filter((part) => part.type === 'text')
                           .map((part, i) => (
@@ -161,7 +143,7 @@ export default function TravelAssistantPage() {
                     </Message>
                   ))}
 
-                  {/* Loading indicator - Uncomment to show feedback during streaming */}
+                  {/* Loading indicator - Show feedback during streaming */}
                   {status === 'streaming' && (
                     <Message from='assistant'>
                       <MessageContent>
@@ -194,9 +176,12 @@ export default function TravelAssistantPage() {
                   disabled={!input.trim() || status === 'streaming'}
                   className='absolute bottom-2 right-2 rounded-lg'
                   onClick={() => {
-                    // Force an update when clicking the submit button
                     if (input.trim()) {
-                      setForceUpdate((prev) => prev + 1);
+                      sendMessage({
+                        role: 'user',
+                        parts: [{ type: 'text', text: input }],
+                      });
+                      setInput('');
                     }
                   }}
                 />
