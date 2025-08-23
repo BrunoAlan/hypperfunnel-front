@@ -1,4 +1,4 @@
-import { UIMessage, convertToModelMessages, streamText } from 'ai';
+import { UIMessage, convertToModelMessages, stepCountIs, streamText } from 'ai';
 import { openai } from '@ai-sdk/openai';
 
 import { experimental_createMCPClient as createMCPClient } from 'ai';
@@ -7,7 +7,7 @@ export const maxDuration = 30;
 
 export async function POST(req: Request) {
   try {
-    const { messages }: { messages: UIMessage[]; } = await req.json();
+    const { messages }: { messages: UIMessage[] } = await req.json();
 
     const url = new URL('http://127.0.0.1:8001/sse');
 
@@ -26,17 +26,19 @@ export async function POST(req: Request) {
       
       - Hotel recommendations and bookings
       - Destination advice and travel planning
-      - Itinerary creation and optimization
       - Travel tips and local insights
       - Budget planning for trips
-      
+
+      Use the tools at your disposal to gather information and provide the best recommendations.
+
       Always be helpful, friendly, and provide specific actionable advice. When recommending hotels or destinations, include relevant details like pricing ranges, amenities, and best times to visit.
       
-      Keep responses concise but informative. If users ask about booking, mention that you can help them find options and they can book instantly through Hyperfunnel.`,
+      The actual year is 2025.
+      `,
       messages: convertToModelMessages(messages),
-      temperature: 0.7,
       maxOutputTokens: 1000,
       tools: mcpTools,
+      stopWhen: stepCountIs(10),
       onFinish: async () => {
         await mcpClient.close();
       },
