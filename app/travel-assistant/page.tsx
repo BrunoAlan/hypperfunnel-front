@@ -18,12 +18,13 @@ import { Button } from '@/components/ui/button';
 import { Plane, ArrowLeft, MessageCircle } from 'lucide-react';
 import { useState } from 'react';
 import { useChat } from '@ai-sdk/react';
-import { Destinations } from '@/components/destinations';
+import { useToolRenderer } from '@/hooks/use-tool-renderer';
 import Link from 'next/link';
 
 export default function TravelAssistantPage() {
   const [input, setInput] = useState('');
   const { messages, sendMessage, status } = useChat();
+  const { renderTool } = useToolRenderer();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -131,64 +132,10 @@ export default function TravelAssistantPage() {
                     <Message from={message.role} key={`${message.id}`}>
                       <MessageContent>
                         {(() => {
-                          // Check for destinations tool with output available
-                          const destinationsTool = message.parts.find(
-                            (part) =>
-                              part.type === 'dynamic-tool' &&
-                              'toolName' in part &&
-                              part.toolName === 'get_available_destinations' &&
-                              'state' in part &&
-                              part.state === 'output-available'
-                          );
-
-                          // If destinations tool has output, show destinations list
-                          if (
-                            destinationsTool &&
-                            'output' in destinationsTool &&
-                            destinationsTool.output
-                          ) {
-                            try {
-                              const output = destinationsTool.output as any;
-                              const destinations =
-                                output.structuredContent?.content || [];
-
-                              return (
-                                <Destinations destinations={destinations} />
-                              );
-                            } catch (error) {
-                              return <div>Error displaying destinations</div>;
-                            }
-                          }
-
-                          // Check for destinations tool loading or error states
-                          const destinationsToolPending = message.parts.find(
-                            (part) =>
-                              part.type === 'dynamic-tool' &&
-                              'toolName' in part &&
-                              part.toolName === 'get_available_destinations'
-                          );
-
-                          if (
-                            destinationsToolPending &&
-                            'state' in destinationsToolPending
-                          ) {
-                            switch (destinationsToolPending.state) {
-                              case 'input-available':
-                                return (
-                                  <div>Cargando destinos disponibles...</div>
-                                );
-                              case 'output-error':
-                                return (
-                                  <div>
-                                    Error:{' '}
-                                    {'errorText' in destinationsToolPending
-                                      ? destinationsToolPending.errorText
-                                      : 'Error al cargar destinos'}
-                                  </div>
-                                );
-                              default:
-                                break;
-                            }
+                          // Try to render any available tools first
+                          const toolContent = renderTool(message.parts);
+                          if (toolContent) {
+                            return toolContent;
                           }
 
                           // Otherwise, show text content
