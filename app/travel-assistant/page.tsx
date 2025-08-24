@@ -16,8 +16,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Plane, ArrowLeft, MessageCircle } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useChat } from '@ai-sdk/react';
+import { Destinations } from '@/components/destinations';
 import Link from 'next/link';
 
 export default function TravelAssistantPage() {
@@ -129,13 +130,76 @@ export default function TravelAssistantPage() {
                   {messages.map((message) => (
                     <Message from={message.role} key={`${message.id}`}>
                       <MessageContent>
-                        {message.parts
-                          .filter((part) => part.type === 'text')
-                          .map((part, i) => (
-                            <Response key={`${message.id}-${i}`}>
-                              {part.text}
-                            </Response>
-                          ))}
+                        {(() => {
+                          // Check for destinations tool with output available
+                          const destinationsTool = message.parts.find(
+                            (part) =>
+                              part.type === 'dynamic-tool' &&
+                              'toolName' in part &&
+                              part.toolName === 'get_available_destinations' &&
+                              'state' in part &&
+                              part.state === 'output-available'
+                          );
+
+                          // If destinations tool has output, show destinations list
+                          if (
+                            destinationsTool &&
+                            'output' in destinationsTool &&
+                            destinationsTool.output
+                          ) {
+                            try {
+                              const output = destinationsTool.output as any;
+                              const destinations =
+                                output.structuredContent?.content || [];
+
+                              return (
+                                <Destinations destinations={destinations} />
+                              );
+                            } catch (error) {
+                              return <div>Error displaying destinations</div>;
+                            }
+                          }
+
+                          // Check for destinations tool loading or error states
+                          const destinationsToolPending = message.parts.find(
+                            (part) =>
+                              part.type === 'dynamic-tool' &&
+                              'toolName' in part &&
+                              part.toolName === 'get_available_destinations'
+                          );
+
+                          if (
+                            destinationsToolPending &&
+                            'state' in destinationsToolPending
+                          ) {
+                            switch (destinationsToolPending.state) {
+                              case 'input-available':
+                                return (
+                                  <div>Cargando destinos disponibles...</div>
+                                );
+                              case 'output-error':
+                                return (
+                                  <div>
+                                    Error:{' '}
+                                    {'errorText' in destinationsToolPending
+                                      ? destinationsToolPending.errorText
+                                      : 'Error al cargar destinos'}
+                                  </div>
+                                );
+                              default:
+                                break;
+                            }
+                          }
+
+                          // Otherwise, show text content
+                          return message.parts
+                            .filter((part) => part.type === 'text')
+                            .map((part, index) => (
+                              <Response key={`${message.id}-${index}`}>
+                                {part.text}
+                              </Response>
+                            ));
+                        })()}
                       </MessageContent>
                     </Message>
                   ))}
