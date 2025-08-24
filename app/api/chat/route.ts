@@ -1,6 +1,5 @@
 import { UIMessage, convertToModelMessages, stepCountIs, streamText } from 'ai';
 import { openai } from '@ai-sdk/openai';
-
 import { experimental_createMCPClient as createMCPClient } from 'ai';
 
 export const maxDuration = 30;
@@ -35,7 +34,7 @@ export async function POST(req: Request) {
       The actual year is 2025.
       `,
       messages: convertToModelMessages(messages),
-      maxOutputTokens: 1000,
+      maxOutputTokens: 100,
       tools: mcpTools,
       stopWhen: stepCountIs(10),
       onFinish: async () => {
