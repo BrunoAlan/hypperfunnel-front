@@ -34,9 +34,9 @@ export async function POST(req: Request) {
       The actual year is 2025.
       `,
       messages: convertToModelMessages(messages),
-      maxOutputTokens: 100,
+      maxOutputTokens: 1000,
       tools: mcpTools,
-      stopWhen: stepCountIs(10),
+      stopWhen: stepCountIs(5),
       onFinish: async () => {
         await mcpClient.close();
       },
