@@ -24,7 +24,7 @@ import Link from 'next/link';
 export default function TravelAssistantPage() {
   const [input, setInput] = useState('');
   const { messages, sendMessage, status } = useChat();
-  const { renderTool } = useToolRenderer();
+  const { renderContent } = useToolRenderer();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,7 +67,7 @@ export default function TravelAssistantPage() {
 
       {/* Chat Interface */}
       <div className='max-w-4xl mx-auto p-4 sm:p-6'>
-        <Card className='h-[calc(100vh-200px)] flex flex-col'>
+        <Card className='h-[calc(100vh-120px)] flex flex-col'>
           <CardHeader className='border-b flex-shrink-0'>
             <CardTitle className='text-lg'>
               How can I help you plan your trip today?
@@ -131,22 +131,7 @@ export default function TravelAssistantPage() {
                   {messages.map((message) => (
                     <Message from={message.role} key={`${message.id}`}>
                       <MessageContent>
-                        {(() => {
-                          // Try to render any available tools first
-                          const toolContent = renderTool(message.parts);
-                          if (toolContent) {
-                            return toolContent;
-                          }
-
-                          // Otherwise, show text content
-                          return message.parts
-                            .filter((part) => part.type === 'text')
-                            .map((part, index) => (
-                              <Response key={`${message.id}-${index}`}>
-                                {part.text}
-                              </Response>
-                            ));
-                        })()}
+                        {renderContent(message.parts)}
                       </MessageContent>
                     </Message>
                   ))}
