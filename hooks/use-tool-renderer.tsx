@@ -109,9 +109,7 @@ export function useToolRenderer() {
     return (
       <div className='space-y-2'>
         {textParts.map((part, index) => (
-          <div key={`text-${index}`} className='text-foreground text-sm'>
-            {part.text}
-          </div>
+          <Response key={`text-${index}`}>{part.text}</Response>
         ))}
         {toolContent && toolContent}
       </div>
